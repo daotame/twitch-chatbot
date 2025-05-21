@@ -339,6 +339,17 @@ const commands = {
     },
     wisdom: {
         response: (tags) => {
+            const outcomesPath = path.join(__dirname, 'outcomes.json');
+            let outcomes;
+
+            try {
+                const data = fs.readFileSync(outcomesPath, 'utf8');
+                outcomes = JSON.parse(data);
+            } catch (err) {
+                console.error('Failed to load outcomes.json:', err);
+                return `@${tags.username}, The Sphinx is confused right now...`;
+            }
+
             if (CultistCoins[tags.username] < 500) {
                 return `${tags.username}, you need at least 500 coins to seek Her wisdom.`;
             } 
@@ -348,22 +359,12 @@ const commands = {
             saveCoins();
 
             const isGood = Math.random() < 0.5;
-            const goodOutcomes = [
-                'got blessed by Heka!',
-                'have been blessed by Ra!',
-            ];
 
-            const badOutcomes = [
-                'have just been told to clean the washrooms.',
-                'got put into a timeout corner.',
-                'are dragged by Skelly... oh dear....',
-            ];
-            
-            const outcome = isGood
-                ? goodOutcomes[Math.floor(Math.random() * goodOutcomes.length)]
-                : badOutcomes[Math.floor(Math.random() * badOutcomes.length)];
+            const list = isGood ? outcomes.good : outcomes.bad;
 
-            return `${tags.username}, Her wisdom has been granted upon you... You ${outcome}`;
+            const outcome = list[Math.floor(Math.random() * list.length)];
+
+            return `${tags.username}, ${outcome}`;
             
 
         }
