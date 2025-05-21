@@ -1,0 +1,5 @@
+[
+  { "q": "What is the capital of France?", "a": "paris" },
+  { "q": "2 + 2 = ?", "a": "4" },
+  { "q": "What year did Twitch launch?", "a": "2011" }
+]
