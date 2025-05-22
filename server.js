@@ -308,6 +308,7 @@ const commands = {
         response: (tags) => {
             if (!CultistCoins[user]){
                 CultistCoins[user] = 0;
+                saveCoins();
             }
             return `${tags.username}, you have ${CultistCoins[tags.username]} coins.`
         }
@@ -411,6 +412,7 @@ const commands = {
         response: (tags) => {
             if (!userGold[tags.username]) {
                 userGold[tags.username] = 0;
+                saveGold()
             }
             return `${tags.username}, you have given ${userGold[tags.username]} gold to the cult.`
         }
