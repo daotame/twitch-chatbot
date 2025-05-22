@@ -348,7 +348,7 @@ const commands = {
             } 
 
             // Deduct 500 coins
-            //CultistCoins[tags.username] -= 500;
+            CultistCoins[tags.username] -= 500;
             saveCoins();
 
             const isGood = Math.random() < 0.5;
