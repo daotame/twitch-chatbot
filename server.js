@@ -306,8 +306,8 @@ const commands = {
     },
     coins: {
         response: (tags) => {
-            if (!CultistCoins[user]){
-                CultistCoins[user] = 0;
+            if (!CultistCoins[tags.username]){
+                CultistCoins[tags.username] = 0;
                 saveCoins();
             }
             return `${tags.username}, you have ${CultistCoins[tags.username]} coins.`
