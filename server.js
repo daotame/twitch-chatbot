@@ -19,7 +19,7 @@ const client = new tmi.Client({
 		username: process.env.TWITCH_BOT_USERNAME,
 		password: process.env.TWITCH_OAUTH_TOKEN
 	},
-	channels: [ 'Ciri_VT' ]
+	channels: [ 'daotama' ]
 });
 
 
@@ -189,8 +189,6 @@ function verifyMessage(hmac, verifySignature) {
     return crypto.timingSafeEqual(Buffer.from(hmac), Buffer.from(verifySignature));
 }
 
-const tokenData = JSON.parse(fs.readFileSync('tokens.json', 'utf-8'));
-
 
 // Setup Gold
 let userGold = {};
@@ -230,20 +228,6 @@ try {
 function saveAttendance() {
   fs.writeFileSync(attendanceFile, JSON.stringify(attendance, null, 2));
 }
-
-const expiresInMs = tokenData.expiresIn * 1000;
-const obtainedAt = new Date(tokenData.obtainedAt);
-const expiryTime = new Date(obtainedAt.getTime() + expiresInMs);
-
-console.log(`Token expires at: ${expiryTime}`);
-
-
-if (expiryTime < new Date()) {
-  console.log('🔴 Token is expired');
-} else {
-  console.log('🟢 Token is still valid');
-}
-
 
 // Custom Currency for user
 let CultistCoins = {};
@@ -340,33 +324,45 @@ const commands = {
     wisdom: {
         response: (tags) => {
             const outcomesPath = path.join(__dirname, 'outcomes.json');
+            const tarots = require('./tarots.json')
             let outcomes;
 
             try {
                 const data = fs.readFileSync(outcomesPath, 'utf8');
                 outcomes = JSON.parse(data);
+
             } catch (err) {
                 console.error('Failed to load outcomes.json:', err);
                 return `@${tags.username}, The Sphinx is confused right now...`;
             }
+
+            if (!CultistCoins[tags.username]) {
+                CultistCoins[tags.username] = 0;
+                saveCoins();
+            }
+
+            console.log(CultistCoins[tags.username])
 
             if (CultistCoins[tags.username] < 500) {
                 return `${tags.username}, you need at least 500 coins to seek Her wisdom.`;
             } 
 
             // Deduct 500 coins
-            CultistCoins[tags.username] -= 500;
+            //CultistCoins[tags.username] -= 500;
             saveCoins();
 
             const isGood = Math.random() < 0.5;
-
-            const list = isGood ? outcomes.good : outcomes.bad;
-
-            const outcome = list[Math.floor(Math.random() * list.length)];
-
-            return `${tags.username}, ${outcome}`;
-            
-
+            if (!isGood){
+                const list = outcomes.bad;
+                const outcome = list[Math.floor(Math.random() * list.length)];
+                return `${tags.username}... ${outcome}`;
+            } else{
+                const list = outcomes.good;
+                const outcome = list[Math.floor(Math.random() * list.length)];
+                const randomTarot = tarots[Math.floor(Math.random() * tarots.length)];
+                console.log(randomTarot)
+                return `${tags.username}... ${outcome} ${randomTarot.description}`;
+            }
         }
     },
     quiz: {
@@ -387,21 +383,21 @@ const commands = {
             quizState.answer = randomQuestion.a;
             quizState.winners = new Set();
 
-            client.say(channel, `📢 QUIZ TIME: ${randomQuestion.q} (You have 30 seconds to answer!)`); //client.say is not a function
+            client.say(channel, `📢 QUIZ TIME: ${quizState.question} (You have 30 seconds to answer!)`);
 
             // Set 30 second timeout
             quizState.timeoutId = setTimeout(() => {
                 quizState.active = false;
 
                 if (quizState.winners.size === 0) {
-                    client.say(channel, `⏱ Time's up! No one got the correct answer. It was: "${quizState.answer}".`)
-                    console.log(`⏱ Time's up! No one got the correct answer. It was: "${quizState.answer}".`)
+                    client.say(channel, `⏱ Time's up! No one got the correct answer. It was: ${quizState.answer}.`)
+                    console.log(`⏱ Time's up! No one got the correct answer. It was: ${quizState.answer}.`)
                 } else {
                     const winners = [...quizState.winners].join(', ');
                     //reward users here
                     quizState.winners.forEach(user => addCoins(user, 500));
-                    client.say(channel, `✅ Time's up! Congrats to: ${winners}! It was "${quizState.answer}. They have been awarded with 500 Coins!"`)
-                    console.log(`✅ Time's up! Congrats to: ${winners}! It was "${quizState.answer}. They have been awarded with 500 Coins!"`)
+                    client.say(channel, `✅ Time's up! Congrats to: ${winners}! It was ${quizState.answer}. They have been awarded with 500 Coins!"`)
+                    console.log(`✅ Time's up! Congrats to: ${winners}! It was ${quizState.answer}. They have been awarded with 500 Coins!"`)
                 }
             }, 30000);
             
@@ -442,7 +438,7 @@ client.on('message', (channel, tags, message) => {
         const cmd = commands[commandName.slice(1)];
         if (cmd) {
             const result = typeof cmd.response === 'function'
-                ? cmd.response(tags, channel, client) //
+                ? cmd.response(tags, channel, client) 
                 : cmd.response;
 
             if (result) {
@@ -453,7 +449,7 @@ client.on('message', (channel, tags, message) => {
     }
 
     // Quiz answer checking
-    if (quizState.active && message.trim().toLowerCase() === quizState.answer) {
+    if (quizState.active && message.trim().toLowerCase() === quizState.answer.toLowerCase()) {
         if (!quizState.winners.has(tags.username)){
             quizState.winners.add(tags.username);
         }
@@ -463,7 +459,6 @@ client.on('message', (channel, tags, message) => {
 	console.log(`${tags['display-name']}: ${message}`);
 });
 
-// Helper Functions Here
 
 // Helper Function to determine if user is moderator or broadcaster
 function isModOrBroadcaster(tags){
