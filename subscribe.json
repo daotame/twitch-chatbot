@@ -1,0 +1,12 @@
+{
+	"type": "channel.channel_points_custom_reward_redemption.add", 
+	"version": "1", 
+	"condition": {
+		"broadcaster_user_id": "236918407"
+	},
+	"transport": {
+		"method": "webhook", 
+		"callback": "https://4100-99-250-35-53.ngrok-free.app/eventsub/", 
+		"secret": "6292e0f2c6bb53847c3f187b955daf481f89a0217f9c5d90d8a21a4b3636953c"
+		}
+	}

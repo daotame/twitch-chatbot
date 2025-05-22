@@ -364,8 +364,7 @@ const commands = {
                 const outcome = list[Math.floor(Math.random() * list.length)];
                 const randomTarot = tarots[Math.floor(Math.random() * tarots.length)];
                 console.log(randomTarot)
-                client.say(channel, `${tags.username}... ${outcome}`);
-                client.say(channel, `The Tarot Card reveals ${randomTarot.tarot} symbolizing ${randomTarot.god}. It reads: ${randomTarot.description}`)
+                client.say(channel, `${tags.username}... ${outcome} ${randomTarot.description}`);
             }
         }
     },
