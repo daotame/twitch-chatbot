@@ -322,7 +322,7 @@ const commands = {
         }
     },
     wisdom: {
-        response: (tags) => {
+        response: (tags, channel, client) => {
             const outcomesPath = path.join(__dirname, 'outcomes.json');
             const tarots = require('./tarots.json')
             let outcomes;
@@ -361,7 +361,8 @@ const commands = {
                 const outcome = list[Math.floor(Math.random() * list.length)];
                 const randomTarot = tarots[Math.floor(Math.random() * tarots.length)];
                 console.log(randomTarot)
-                return `${tags.username}... ${outcome} ${randomTarot.description}`;
+                client.say(channel, `${tags.username}... ${outcome}`);
+                client.say(channel, `The Tarot Card reveals ${randomTarot.tarot} symbolizing ${randomTarot.god}. It reads: ${randomTarot.description}`)
             }
         }
     },
