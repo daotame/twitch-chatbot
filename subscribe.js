@@ -58,6 +58,16 @@ async function createSubscription(token) {
     console.log('EventSub subscription created:', res.data);
 }
 
+async function getSubscriptions(token) {
+    const res = await axios.get(TWITCH_API_BASE, {
+        headers: {
+            'Client-ID': process.env.TWITCH_CLIENT_ID,
+            'Authorization': `Bearer ${token}`
+        }
+    });
+    console.log(JSON.stringify(res.data, null, 2));
+}
+
 (async () => {
     try {
         const token = await getAccessToken();
@@ -75,4 +85,5 @@ async function createSubscription(token) {
     } catch (error) {
         console.error('Failed to subscribe:', err.response?.data || err.message);
     }
+    await getSubscriptions(token);
 })();
