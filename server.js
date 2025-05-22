@@ -203,10 +203,9 @@ try {
 }
 
 // Function to add gold
-function addGold(user, amount, channel) {
+function addGold(user, amount) {
   if (!userGold[user]) userGold[user] = 0;
   userGold[user] += amount;
-  client.say(channel, `${user} has given ${amount} gold to the cult! Praise be to the Sphinx!`)
   saveGold();
 }
 
@@ -307,6 +306,9 @@ const commands = {
     },
     coins: {
         response: (tags) => {
+            if (!CultistCoins[user]){
+                CultistCoins[user] = 0;
+            }
             return `${tags.username}, you have ${CultistCoins[tags.username]} coins.`
         }
     },
@@ -407,8 +409,10 @@ const commands = {
     },
     gold: {
         response: (tags) => {
-            const gold = userGold[tags.username] || 0;
-            return `${tags.username}, you have given ${gold} gold to the cult.`
+            if (!userGold[tags.username]) {
+                userGold[tags.username] = 0;
+            }
+            return `${tags.username}, you have given ${userGold[tags.username]} gold to the cult.`
         }
     },
     goldtop: {
