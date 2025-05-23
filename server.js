@@ -483,10 +483,6 @@ async function recordAttendance(username) {
         .eq('username', username)
         .single();
 
-    if (error && error.code !== 'PGRST116') {
-        throw error;
-    }
-
     if (!userData) {
         const insertResult = await supabase.from('attendance').insert({
             username,
