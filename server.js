@@ -116,8 +116,6 @@ app.post('/eventsub', (req, res) => {
                     //    return `${user}, you've already checked in today!`;
                     //}
 
-                    const result = recordAttendance(user);
-
                     //const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
                     //if (attendance[user].last === yesterday) {
                     //    attendance[user].streak += 1;
@@ -129,7 +127,14 @@ app.post('/eventsub', (req, res) => {
                     //attendance[user].dates.push(today);
 
                     //saveAttendance();
-                    client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! Your current streak is ${result.streak} day(s).`)
+                    try {
+                        const result = recordAttendance(user);
+                        client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! Your current streak is ${result.streak} day(s).`)
+                    } catch (err) {
+                        client.say(channel, `❌ Failed to record attendance for ${user}`);
+                    }
+
+
                 } 
                 
             }
