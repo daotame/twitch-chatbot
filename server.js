@@ -117,6 +117,7 @@ app.post('/eventsub', (req, res) => {
                     }
 
                     recordAttendance(user);
+                    console.log(attendance[user])
 
                     //const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
                     //if (attendance[user].last === yesterday) {
