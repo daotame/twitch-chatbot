@@ -12,6 +12,7 @@
   "author": "Daotama",
   "license": "MIT",
   "dependencies": {
+    "@supabase/supabase-js": "^2.49.8",
     "@twurple/api": "^7.3.0",
     "@twurple/auth": "^7.3.0",
     "@twurple/eventsub-http": "^7.3.0",

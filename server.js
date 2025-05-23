@@ -10,6 +10,9 @@ const express = require('express');
 const app = express();
 port = 3000;
 
+const { createClient } = require('@supabase/supabase-js');
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+
 // Creating New TMI Client
 const client = new tmi.Client({
     connection: {
@@ -60,7 +63,6 @@ app.post('/eventsub', (req, res) => {
     let secret = getSecret();
     let message = getHmacMessage(req);
     let hmac = HMAC_PREFIX + getHmac(secret, message);  // Signature to compare
-    console.log("Test")
 
     if (true === verifyMessage(hmac, req.headers[TWITCH_MESSAGE_SIGNATURE])) {
         console.log("signatures match");
@@ -100,12 +102,11 @@ app.post('/eventsub', (req, res) => {
 
             // Attendance Event
             if (eventType === 'channel.channel_points_custom_reward_redemption.add'){
-                console.log("Test Checked")
                 const user = notification.event.user_name;
                 const rewardTitle = notification.event.reward.title;
 
                 if (rewardTitle === "Cult Attendance") {
-                    const today = getTodayDateString()
+                    //const today = getTodayDateString()
 
                     if (!attendance[user]) {
                         attendance[user] = { dates: [], last: null, streak: 0}
@@ -115,17 +116,19 @@ app.post('/eventsub', (req, res) => {
                         return `${user}, you've already checked in today!`;
                     }
 
-                    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-                    if (attendance[user].last === yesterday) {
-                        attendance[user].streak += 1;
-                    } else {
-                        attendance[user].streak = 1;
-                    }
+                    recordAttendance(user);
 
-                    attendance[user].last = today;
-                    attendance[user].dates.push(today);
+                    //const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+                    //if (attendance[user].last === yesterday) {
+                    //    attendance[user].streak += 1;
+                    //} else {
+                    //    attendance[user].streak = 1;
+                    //}
 
-                    saveAttendance();
+                    //attendance[user].last = today;
+                    //attendance[user].dates.push(today);
+
+                    //saveAttendance();
                     client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! Your current streak is ${attendance[user].streak} day(s).`)
                 } 
                 
@@ -466,6 +469,43 @@ client.on('message', (channel, tags, message) => {
 	// "Alca: Hello, World!"
 	console.log(`${tags['display-name']}: ${message}`);
 });
+
+
+//Async Function for Supabase Attendance Data Storage
+async function recordAttendance(username) {
+    const today = getTodayDateString()
+
+    const { data: userData } = await supabase
+        .from('attendance')
+        .select('*')
+        .eq('username', username)
+        .single();
+
+    if (!userData) {
+        await supabase.from('attendance').insert({
+            username,
+            dates: [today],
+            last: today,
+            streak: 1
+        });
+    } else {
+        const dates = userData.dates || [];
+        if (!dates.includes(today)) {
+            const newDates = [...dates, today];
+            const newStreak = userData.last === today ? userData.streak: userData.streak + 1;
+
+            await supabase.from('attendance')
+                .update({
+                    dates: newDates,
+                    last: today,
+                    streak: newStreak
+                })
+                .eq('username', username)
+        }
+    }
+}
+
+
 
 
 // Helper Function to determine if user is moderator or broadcaster
