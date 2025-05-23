@@ -484,55 +484,33 @@ async function recordAttendance(username) {
         .single();
 
     if (!userData) {
-        const insertResult = await supabase.from('attendance').insert({
+        await supabase.from('attendance').insert({
             username,
             dates: [today],
             last: today,
             streak: 1
         });
-
-        if (insertResult.error) throw insertResult.error;
-
-        return { 
-            new: true, 
-            streak: 1, 
-            last: today, 
-            dates: [today] 
-            };
+            return { new: true, dates: [today], last: today, streak: 1};
         } 
 
-        const dates = userData.dates || [];
-        const alreadyCheckedIn = dates.includes(today);
+    const dates = userData.dates || [];
 
-        if (!alreadyCheckedIn) {
-            const newDates = [...dates, today];
-            const newStreak = userData.last === today ? userData.streak: userData.streak + 1;
+    if (!dates.includes(today)) {
+        const newDates = [...dates, today];
+        const newStreak = userData.last === today ? userData.streak: userData.streak + 1;
 
-            const updateResult = supabase.from('attendance')
-                .update({
-                    dates: newDates,
-                    last: today,
-                    streak: newStreak
-                })
-                .eq('username', username);
+        supabase.from('attendance')
+            .update({
+                dates: newDates,
+                last: today,
+                streak: newStreak
+            })
+            .eq('username', username);
 
-            if (updateResult.error) throw updateResult.error;
-
-            return {
-                new: false, 
-                streak: newStreak, 
-                last: today, 
-                dates: newDates 
-            };
+            return { new: false, dates: newDates, last: today, streak: newStreak};
+        } else{
+            return { new: false, dates: userData.dates, last: userData.last, streak: userData.streak};
         }
-    
-
-    return {
-        new: false,
-        streak: userData.streak,
-        last: userData.last,
-        dates: userData.dates
-    };
 }
 
 // Helper Function to determine if user is moderator or broadcaster
