@@ -99,6 +99,7 @@ app.post('/eventsub', (req, res) => {
 
             // Attendance Event
             if (eventType === 'channel.channel_points_custom_reward_redemption.add'){
+                console.log("Test Checked")
                 const user = notification.event.user_name;
                 const rewardTitle = notification.event.reward.title;
 
