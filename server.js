@@ -106,7 +106,7 @@ app.post('/eventsub', (req, res) => {
                 const rewardTitle = notification.event.reward.title;
 
                 if (rewardTitle === "Cult Attendance") {
-                    //const today = getTodayDateString()
+                    const today = getTodayDateString()
 
                     if (!attendance[user]) {
                         attendance[user] = { dates: [], last: null, streak: 0}
