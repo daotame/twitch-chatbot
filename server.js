@@ -106,8 +106,6 @@ app.post('/eventsub', (req, res) => {
                 const rewardTitle = notification.event.reward.title;
 
                 if (rewardTitle === "Cult Attendance") {
-                    const today = getTodayDateString()
-
                     //if (!attendance[user]) {
                     //    attendance[user] = { dates: [], last: null, streak: 0}
                    // }
@@ -129,7 +127,7 @@ app.post('/eventsub', (req, res) => {
                     //saveAttendance();
 
                     const result = recordAttendance(user);
-                    console.log(result)
+                    console.log(`[DEBUG] Attendance data:`, result);
                     client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! Your current streak is ${result.streak} day(s).`)
    
 
@@ -485,37 +483,61 @@ async function recordAttendance(username) {
         .eq('username', username)
         .single();
 
+    if (error && error.code !== 'PGRST116') {
+        throw error;
+    }
+
     if (!userData) {
-        await supabase.from('attendance').insert({
+        const insertResult = await supabase.from('attendance').insert({
             username,
             dates: [today],
             last: today,
             streak: 1
         });
-        return { new: true, streak: 1, last: today, dates: [today] };
-    } else {
+
+        if (insertResult.error) throw insertResult.error;
+
+        return { 
+            new: true, 
+            streak: 1, 
+            last: today, 
+            dates: [today] 
+            };
+        } 
+
         const dates = userData.dates || [];
-        if (!dates.includes(today)) {
+        const alreadyCheckedIn = dates.includes(today);
+
+        if (!alreadyCheckedIn) {
             const newDates = [...dates, today];
             const newStreak = userData.last === today ? userData.streak: userData.streak + 1;
 
-            await supabase.from('attendance')
+            const updateResult = supabase.from('attendance')
                 .update({
                     dates: newDates,
                     last: today,
                     streak: newStreak
                 })
-                .eq('username', username)
+                .eq('username', username);
 
-                return { new: false, streak: newStreak, last: today, dates: newDates };
-        } else {
-            return { new: false, streak: userData.streak, last: userData.last, dates };
+            if (updateResult.error) throw updateResult.error;
+
+            return {
+                new: false, 
+                streak: newStreak, 
+                last: today, 
+                dates: newDates 
+            };
         }
-    }
+    
+
+    return {
+        new: false,
+        streak: userData.streak,
+        last: userData.last,
+        dates: userData.dates
+    };
 }
-
-
-
 
 // Helper Function to determine if user is moderator or broadcaster
 function isModOrBroadcaster(tags){
