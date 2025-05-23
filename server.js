@@ -129,6 +129,7 @@ app.post('/eventsub', (req, res) => {
                     //saveAttendance();
                     try {
                         const result = recordAttendance(user);
+                        console.log(result)
                         client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! Your current streak is ${result.streak} day(s).`)
                     } catch (err) {
                         client.say(channel, `❌ Failed to record attendance for ${user}`);
