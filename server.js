@@ -108,16 +108,15 @@ app.post('/eventsub', (req, res) => {
                 if (rewardTitle === "Cult Attendance") {
                     const today = getTodayDateString()
 
-                    if (!attendance[user]) {
-                        attendance[user] = { dates: [], last: null, streak: 0}
-                    }
+                    //if (!attendance[user]) {
+                    //    attendance[user] = { dates: [], last: null, streak: 0}
+                   // }
 
-                    if (attendance[user].dates.includes(today)) {
-                        return `${user}, you've already checked in today!`;
-                    }
+                    //if (attendance[user].dates.includes(today)) {
+                    //    return `${user}, you've already checked in today!`;
+                    //}
 
-                    recordAttendance(user);
-                    console.log(attendance[user])
+                    const result = recordAttendance(user);
 
                     //const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
                     //if (attendance[user].last === yesterday) {
@@ -130,7 +129,7 @@ app.post('/eventsub', (req, res) => {
                     //attendance[user].dates.push(today);
 
                     //saveAttendance();
-                    client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! Your current streak is ${attendance[user].streak} day(s).`)
+                    client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! Your current streak is ${result.streak} day(s).`)
                 } 
                 
             }
@@ -489,6 +488,7 @@ async function recordAttendance(username) {
             last: today,
             streak: 1
         });
+        return { new: true, streak: 1, last: today, dates: [today] };
     } else {
         const dates = userData.dates || [];
         if (!dates.includes(today)) {
@@ -502,6 +502,10 @@ async function recordAttendance(username) {
                     streak: newStreak
                 })
                 .eq('username', username)
+
+                return { new: false, streak: newStreak, last: today, dates: newDates };
+        } else {
+            return { new: false, streak: userData.streak, last: userData.last, dates };
         }
     }
 }
