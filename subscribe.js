@@ -82,8 +82,8 @@ async function getSubscriptions(token) {
             }
         }
         await createSubscription(token);
+        await getSubscriptions(token);
     } catch (error) {
         console.error('Failed to subscribe:', err.response?.data || err.message);
     }
-    await getSubscriptions(token);
 })();
