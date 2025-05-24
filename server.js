@@ -10,8 +10,7 @@ const express = require('express');
 const app = express();
 port = 3000;
 
-const { createClient } = require('@supabase/supabase-js');
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+const db = require('./db.js');
 
 // Creating New TMI Client
 const client = new tmi.Client({
@@ -126,10 +125,7 @@ app.post('/eventsub', (req, res) => {
 
                     //saveAttendance();
 
-                    const result = recordAttendance(user).then(result => {console.log(`[DEBUG] Attendance data:`, result);}).catch(err => {console.error(`[ERROR]`, err);});
 
-                    console.log(`[DEBUG] Attendance data:`, result);
-                    console.log(getUserAttendance(user))
                     client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! You have a ${result.streak} attendance streak!`)
 
                 } 
@@ -491,62 +487,33 @@ client.on('message', (channel, tags, message) => {
 
 
 //Function for Supabase Attendance Data Storage
-async function recordAttendance(username) {
+function recordAttendance(username) {
     const today = getTodayDateString()
 
-    const { data: userData } = await supabase
-        .from('attendance')
-        .select('*')
-        .eq('username', username)
-        .single();
+    db.get(`SELECT * FROM attendance WHERE username = ?`, [username], (err, row) => {
+        if (err) return console.error('DB error', err);
 
-    if (!userData) {
-        await supabase.from('attendance').insert({
-            username,
-            dates: [today],
-            last: today,
-            streak: 1
-        });
-            //return { new: true, dates: [today], last: today, streak: 1};
-    }
-    console.log(userData)
-    console.log(userData.last)
-    console.log(userData.streak)
+        if (!row) {
+            const dates = JSON.stringify([today]);
+            db.run(`INSERT INTO attendance (username, dates, last, streak) VALUES (?, ?, ?, ?)`,
+                [username, dates, today, 1]);
+        } else {
+            const dates = JSON.parse(row.dates);
+            const alreadyCheckedIn = dates.includes(today);
 
-    const dates = userData.dates || [];
-
-    console.log(dates)
-
-    if (!dates.includes(today)) {
-        const newDates = [...dates, today];
-        const newStreak = userData.last === today ? userData.streak: userData.streak + 1;
-
-        await supabase.from('attendance')
-            .update({
-                dates: newDates,
-                last: today,
-                streak: newStreak
-            })
-            .eq('username', username);
-
-            //return { new: false, dates: newDates, last: today, streak: newStreak};
+            if (!alreadyCheckedIn) {
+                dates.push(today);
+                const newStreak = row.last === today ? row.streak : row.streak + 1;
+                db.run(`UPDATE attendance SET dates = ?, last = ?, streak = ? WHERE username = ?`,
+                    [JSON.stringify(dates), today, newStreak, username]);
+            }
         }
+    });
 }
 
-//Async Function for getting Attendance
-async function getUserAttendance(username) {
-    const { data, error } = await supabase
-        .from('attendance')
-        .select('*')
-        .eq('username', username)
-        .single();
+//Function for getting Attendance
+function getUserAttendance(username) {
 
-    if (error) {
-        console.error(`❌ Could not get attendance for ${username}:`, error.message);
-        return null;
-    }
-
-    return data
 }
 
 // Helper Function to determine if user is moderator or broadcaster
