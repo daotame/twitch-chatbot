@@ -144,7 +144,9 @@ app.post('/eventsub', async (req, res) => {
                                 dates: [today],
                                 last: today,
                                 streak: 1
-                        });
+                        })
+                        .select()
+                        .single();
                     } else {
                         const dates = data.dates || [];
                         if (!dates.includes(today)) {
