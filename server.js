@@ -107,7 +107,6 @@ app.post('/eventsub', async (req, res) => {
                 const rewardTitle = notification.event.reward.title;
 
                 if (rewardTitle === "Cult Attendance") {
-                    const today = new Date().toISOString().split('T')[0];
 
                     //if (!attendance[user]) {
                     //    attendance[user] = { dates: [], last: null, streak: 0}
@@ -531,12 +530,8 @@ client.on('message', (channel, tags, message) => {
 
 //Function for Supabase Attendance Data Storage
 async function recordAttendance(username) {
-    const { data: userData } = await supabase
-        .from('attendance')
-        .select('*')
-        .eq('username', username)
-        .single();
-        
+    const today = new Date().toISOString().split('T')[0];
+
     await supabase.from('attendance').insert({
         username,
         dates: [today],
