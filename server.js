@@ -135,11 +135,21 @@ app.post('/eventsub', async (req, res) => {
                         .eq('username', user)
                         .single();
 
-                    console.log(data);
+                    if (!data) {
+                        await supabase.from('attendance')
+                            .insert({
+                                user,
+                                dates: [today],
+                                last: today,
+                                streak: 1
+                        })
+                            .select()
+                            .single();
+                            console.log(data)
+                    }
 
                     recordAttendance(user);
 
-                    console.log(data)
                     //if (!data) {
                     //    await supabase.from('attendance')
                     //        .insert({
@@ -535,7 +545,7 @@ async function recordAttendance(username) {
         .select('*')
         .eq('username', username)
         .single();
-        
+
     if (!userData) {
         await supabase.from('attendance').insert({
             username,
