@@ -10,7 +10,9 @@ const express = require('express');
 const app = express();
 port = 3000;
 
-const db = require('./db.js');
+const { createClient } = require('@supabase/supabase-js');
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+
 
 // Creating New TMI Client
 const client = new tmi.Client({
@@ -487,29 +489,39 @@ client.on('message', (channel, tags, message) => {
 
 
 //Function for Supabase Attendance Data Storage
-function recordAttendance(username) {
-    const today = getTodayDateString()
+async function recordAttendance(username) {
+    const today = new Date().toISOString().split('T')[0];
 
-    db.get(`SELECT * FROM attendance WHERE username = ?`, [username], (err, row) => {
-        if (err) return console.error('DB error', err);
+    const { data: userData } = await supabase
+        .from('attendance')
+        .select('*')
+        .eq('username', username)
+        .single();
 
-        if (!row) {
-            const dates = JSON.stringify([today]);
-            db.run(`INSERT INTO attendance (username, dates, last, streak) VALUES (?, ?, ?, ?)`,
-                [username, dates, today, 1]);
-        } else {
-            const dates = JSON.parse(row.dates);
-            const alreadyCheckedIn = dates.includes(today);
+    if (!userData) {
+        await supabase.from('attendance').insert({
+            username,
+            dates: [today],
+            last: today,
+            streak: 1
+        });
+    } else {
+        const dates = userData.dates || [];
+        if (!dates.includes(today)) {
+            const newDates = [...dates, today];
+            const newStreak = userData.last === today ? userData.streak : userData.streak + 1;
 
-            if (!alreadyCheckedIn) {
-                dates.push(today);
-                const newStreak = row.last === today ? row.streak : row.streak + 1;
-                db.run(`UPDATE attendance SET dates = ?, last = ?, streak = ? WHERE username = ?`,
-                    [JSON.stringify(dates), today, newStreak, username]);
-            }
-        }
-    });
+            await supabase.from('attendance')
+                .update({
+                    dates: newDates,
+                    last: today,
+                    streak: newStreak
+                })
+                .eq('username', username);
+    }
+  }
 }
+
 
 //Function for getting Attendance
 function getUserAttendance(username) {
