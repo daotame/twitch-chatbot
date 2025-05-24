@@ -285,10 +285,12 @@ const commands = {
                 .eq('username', username)
                 .single();
             
+            console.log(data);
+            console.log(error)
             if (error || !data) {
                 return `No attendance record found for ${username}.`;
             }
-            console.log(data);
+            
             const streak = data.streak || 0;
             const lastSeen = data.last || 'Never';
             const days = data.dates?.length || 0;
