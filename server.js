@@ -497,6 +497,7 @@ async function recordAttendance(username) {
         .select('*')
         .eq('username', username)
         .single();
+    console.log(userData)
 
     if (!userData) {
         await supabase.from('attendance').insert({
@@ -509,7 +510,6 @@ async function recordAttendance(username) {
         } 
 
     const dates = userData.dates || [];
-    const lastDates = userData.last;
 
     if (!dates.includes(today)) {
         const newDates = [...dates, today];
