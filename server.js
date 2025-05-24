@@ -488,33 +488,34 @@ client.on('message', (channel, tags, message) => {
 });
 
 
-//Async Function for Supabase Attendance Data Storage
-function recordAttendance(username) {
+//Function for Supabase Attendance Data Storage
+async function recordAttendance(username, supabase) {
     const today = getTodayDateString()
 
-    const { data: userData } = supabase
+    const { data: userData } = await supabase
         .from('attendance')
         .select('*')
         .eq('username', username)
         .single();
 
     if (!userData) {
-        supabase.from('attendance').insert({
+        await supabase.from('attendance').insert({
             username,
             dates: [today],
             last: today,
             streak: 1
         });
-            return { new: true, dates: [today], last: today, streak: 1};
+            //return { new: true, dates: [today], last: today, streak: 1};
         } 
 
     const dates = userData.dates || [];
+    const lastDates = userData.last;
 
     if (!dates.includes(today)) {
         const newDates = [...dates, today];
         const newStreak = userData.last === today ? userData.streak: userData.streak + 1;
 
-        supabase.from('attendance')
+        await supabase.from('attendance')
             .update({
                 dates: newDates,
                 last: today,
@@ -522,9 +523,7 @@ function recordAttendance(username) {
             })
             .eq('username', username);
 
-            return { new: false, dates: newDates, last: today, streak: newStreak};
-        } else{
-            return { new: false, dates: userData.dates, last: userData.last, streak: userData.streak};
+            //return { new: false, dates: newDates, last: today, streak: newStreak};
         }
 }
 
