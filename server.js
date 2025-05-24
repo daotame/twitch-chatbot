@@ -487,17 +487,17 @@ client.on('message', (channel, tags, message) => {
 
 
 //Async Function for Supabase Attendance Data Storage
-async function recordAttendance(username) {
+function recordAttendance(username) {
     const today = getTodayDateString()
 
-    const { data: userData } = await supabase
+    const { data: userData } = supabase
         .from('attendance')
         .select('*')
         .eq('username', username)
         .single();
 
     if (!userData) {
-        await supabase.from('attendance').insert({
+        supabase.from('attendance').insert({
             username,
             dates: [today],
             last: today,
@@ -527,8 +527,8 @@ async function recordAttendance(username) {
 }
 
 // Async Function to get Attendance
-async function getAttendance(username) {
-  const { data, error } = await supabase
+function getAttendance(username) {
+  const { data, error } = supabase
     .from('attendance')
     .select('*')
     .eq('username', username)
