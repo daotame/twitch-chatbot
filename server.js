@@ -144,7 +144,7 @@ app.post('/eventsub', async (req, res) => {
                             streak: 1
                         });
                     } else {
-                        const dates = userData.dates || [];
+                        const dates = data.dates || [];
                         if (!dates.includes(today)) {
                             const newDates = [...dates, today];
                             const newStreak = userData.last === today ? userData.streak : userData.streak + 1;
