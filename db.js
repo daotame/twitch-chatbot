@@ -1,18 +1,17 @@
-const sqlite3 = require('sqlite3').verbose();
+const Database = require('better-sqlite3');
 const path = require('path');
 
 const dbPath = path.join('/data', 'attendance.db');
-const db = new sqlite3.Database(dbPath);
+const db = new Database(dbPath)
 
-db.serialize(() => {
-  db.run(`
+// Create table if not exists
+db.prepare(`
     CREATE TABLE IF NOT EXISTS attendance (
-      username TEXT PRIMARY KEY,
-      dates TEXT,       -- JSON array of ISO date strings
-      last TEXT,        -- ISO string
-      streak INTEGER
-    )
-  `);
-});
+        username TEXT PRIMARY KEY,
+        dates TEXT,
+        last TEXT,
+        streak INTEGER
+  )
+`).run();
 
 module.exports = db;

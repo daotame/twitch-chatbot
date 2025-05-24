@@ -18,12 +18,12 @@
     "@twurple/eventsub-http": "^7.3.0",
     "@twurple/eventsub-ws": "^7.3.0",
     "axios": "^1.9.0",
+    "better-sqlite3": "^11.10.0",
     "body-parser": "^2.2.0",
     "crypto": "^1.0.1",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "fs": "^0.0.1-security",
-    "sqlite3": "^5.1.7",
     "tmi.js": "^1.8.5",
     "twurple": "^1.0.0"
   }
