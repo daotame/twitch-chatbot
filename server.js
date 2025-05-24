@@ -128,7 +128,7 @@ app.post('/eventsub', (req, res) => {
 
                     const result = recordAttendance(user);
                     console.log(`[DEBUG] Attendance data:`, result);
-                    client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded!`)
+                    client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! ${result.streak} streaks`)
 
                 } 
                 
