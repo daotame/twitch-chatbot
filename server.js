@@ -489,7 +489,7 @@ client.on('message', (channel, tags, message) => {
 
 
 //Function for Supabase Attendance Data Storage
-async function recordAttendance(username, supabase) {
+async function recordAttendance(username) {
     const today = getTodayDateString()
 
     const { data: userData } = await supabase
