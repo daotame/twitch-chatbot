@@ -124,8 +124,9 @@ app.post('/eventsub', (req, res) => {
                     //attendance[user].dates.push(today);
 
                     //saveAttendance();
-                    recordAttendance(user);
-                    client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded!`)
+
+
+                    client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! You have a ${result.streak} attendance streak!`)
 
                 } 
                 
@@ -157,18 +158,6 @@ app.post('/eventsub', (req, res) => {
 
     console.log("Proceed")
 })
-
-app.get('/debug/attendance', (req, res) => {
-  const rows = db.prepare(`SELECT * FROM attendance`).all();
-  const parsed = rows.map(row => ({
-    username: row.username,
-    dates: JSON.parse(row.dates),
-    last: row.last,
-    streak: row.streak
-  }));
-  res.json(parsed);
-});
-
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
@@ -499,26 +488,27 @@ client.on('message', (channel, tags, message) => {
 
 //Function for Supabase Attendance Data Storage
 function recordAttendance(username) {
-    const today = getTodayDateString();
+    const today = getTodayDateString()
 
-    const row = db.prepare(`SELECT * FROM attendance WHERE username = ?`).get(username);
+    db.get(`SELECT * FROM attendance WHERE username = ?`, [username], (err, row) => {
+        if (err) return console.error('DB error', err);
 
-    if (!row) {
-        const dates = JSON.stringify([today]);
-        db.prepare(`INSERT INTO attendance (username, dates, last, streak) VALUES (?, ?, ?, ?)`)
-            .run(username, dates, today, 1);
-    } else {
-        const dates = JSON.parse(row.dates || '[]');
-        const alreadyCheckedIn = dates.includes(today);
+        if (!row) {
+            const dates = JSON.stringify([today]);
+            db.run(`INSERT INTO attendance (username, dates, last, streak) VALUES (?, ?, ?, ?)`,
+                [username, dates, today, 1]);
+        } else {
+            const dates = JSON.parse(row.dates);
+            const alreadyCheckedIn = dates.includes(today);
 
-        if (!alreadyCheckedIn) {
-            dates.push(today);
-            const newStreak = row.last === today ? row.streak : row.streak + 1;
-
-            db.prepare(`UPDATE attendance SET dates = ?, last = ?, streak = ? WHERE username = ?`)
-                .run(JSON.stringify(dates), today, newStreak, username);
-    }
-  }
+            if (!alreadyCheckedIn) {
+                dates.push(today);
+                const newStreak = row.last === today ? row.streak : row.streak + 1;
+                db.run(`UPDATE attendance SET dates = ?, last = ?, streak = ? WHERE username = ?`,
+                    [JSON.stringify(dates), today, newStreak, username]);
+            }
+        }
+    });
 }
 
 //Function for getting Attendance
