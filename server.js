@@ -128,7 +128,7 @@ app.post('/eventsub', (req, res) => {
 
                     const result = recordAttendance(user);
                     console.log(`[DEBUG] Attendance data:`, result);
-                    client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! ${result.streak} streaks`)
+                    client.say(process.env.TWITCH_BOT_USERNAME, result)
 
                 } 
                 
@@ -528,8 +528,10 @@ async function recordAttendance(username) {
             .eq('username', username);
 
             //return { new: false, dates: newDates, last: today, streak: newStreak};
+            return `${username}, check-in recorded! You have a ${userData.streak} attendance streak!`
+        } else {
+            return `${username}, you already checked in!`
         }
-    return `${username}, check-in recorded! You have a ${userData.streak} attendance streak!`
 }
 
 // Helper Function to determine if user is moderator or broadcaster
