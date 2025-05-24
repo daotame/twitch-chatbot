@@ -59,7 +59,7 @@ app.use(express.raw({          // Need raw message body for signature verificati
 }))  
 
 
-app.post('/eventsub', async (req, res) => {
+app.post('/eventsub', (req, res) => {
     let secret = getSecret();
     let message = getHmacMessage(req);
     let hmac = HMAC_PREFIX + getHmac(secret, message);  // Signature to compare
@@ -126,7 +126,8 @@ app.post('/eventsub', async (req, res) => {
 
                     //saveAttendance();
 
-                    const result = await recordAttendance(user);
+                    const result = recordAttendance(user).then(result => {console.log(`[DEBUG] Attendance data:`, result);}).catch(err => {console.error(`[ERROR]`, err);});
+
                     console.log(`[DEBUG] Attendance data:`, result);
                     client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! You have a ${result.streak} attendance streak!`)
 
