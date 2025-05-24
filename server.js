@@ -129,6 +129,7 @@ app.post('/eventsub', (req, res) => {
                     const result = recordAttendance(user).then(result => {console.log(`[DEBUG] Attendance data:`, result);}).catch(err => {console.error(`[ERROR]`, err);});
 
                     console.log(`[DEBUG] Attendance data:`, result);
+                    console.log(getUserAttendance(user))
                     client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! You have a ${result.streak} attendance streak!`)
 
                 } 
@@ -507,7 +508,7 @@ async function recordAttendance(username) {
             streak: 1
         });
             //return { new: true, dates: [today], last: today, streak: 1};
-        }
+    }
     console.log(userData)
     console.log(userData.last)
     console.log(userData.streak)
@@ -533,6 +534,20 @@ async function recordAttendance(username) {
 }
 
 //Async Function for getting Attendance
+async function getUserAttendance(username) {
+    const { data, error } = await supabase
+        .from('attendance')
+        .select('*')
+        .eq('username', username)
+        .single();
+
+    if (error) {
+        console.error(`❌ Could not get attendance for ${username}:`, error.message);
+        return null;
+    }
+
+    return data
+}
 
 // Helper Function to determine if user is moderator or broadcaster
 function isModOrBroadcaster(tags){
