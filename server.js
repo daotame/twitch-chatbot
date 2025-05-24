@@ -156,6 +156,7 @@ app.post('/eventsub', async (req, res) => {
                                     streak: newStreak
                                 })
                             .eq('username', user);
+                            client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! They have a ${data.streak} attendance streak!`)
                         } else {
                             client.say(process.env.TWITCH_BOT_USERNAME, `${user}, you already checked in!`)
                         }
@@ -163,7 +164,6 @@ app.post('/eventsub', async (req, res) => {
 
                     //const result = await recordAttendance(user);
                     //console.log(result)
-                    client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! They have a ${data.streak} attendance streak!`)
 
                 } 
                 
