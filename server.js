@@ -528,6 +528,7 @@ async function recordAttendance(username) {
 
             //return { new: false, dates: newDates, last: today, streak: newStreak};
         }
+    return `${username}, check-in recorded! You have a ${userData.streak} attendance streak!`
 }
 
 // Helper Function to determine if user is moderator or broadcaster
