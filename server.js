@@ -507,6 +507,7 @@ async function getAttendance(username) {
         .single();
 
     console.log(data)
+    console.log(data.dates)
     return `${username} has attended ${data.dates.length()} times!`
 }
 
