@@ -498,6 +498,9 @@ async function recordAttendance(username) {
         .eq('username', username)
         .single();
     console.log(userData)
+    console.log(userData.dates)
+    console.log(userData.last)
+    console.log(userData.streak)
 
     if (!userData) {
         await supabase.from('attendance').insert({
