@@ -107,6 +107,7 @@ app.post('/eventsub', async (req, res) => {
                 const rewardTitle = notification.event.reward.title;
 
                 if (rewardTitle === "Cult Attendance") {
+                    const today = getTodayDateString();
 
                     //if (!attendance[user]) {
                     //    attendance[user] = { dates: [], last: null, streak: 0}
@@ -128,7 +129,7 @@ app.post('/eventsub', async (req, res) => {
 
                     //saveAttendance();
 
-                    const { data, error } = await supabase
+                    const { data } = await supabase
                         .from('attendance')
                         .select('*')
                         .eq('username', user)
@@ -142,37 +143,13 @@ app.post('/eventsub', async (req, res) => {
                         client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in registered!`)
                     }
 
-                    //if (!data) {
-                    //    await supabase.from('attendance')
-                    //        .insert({
-                    //            user,
-                    //            dates: [today],
-                    //            last: today,
-                    //            streak: 1
-                    //    })
-                    //        .select()
-                    //        .single();
-                    //        console.log(data)
-                    //} else {
-                    //    const dates = data.dates || [];
-                    //    if (!dates.includes(today)) {
-                    //        const newDates = [...dates, today];
-                    //        const newStreak = userData.last === today ? userData.streak : userData.streak + 1;
-                    //        await supabase.from('attendance')
-                    //            .update({
-                    //                dates: newDates,
-                    //                last: today,
-                    //                streak: newStreak
-                    //            })
-                    //        .eq('username', user);
-                    //        client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! They have a ${data.streak} attendance streak!`)
-                    //    } else {
-                    //        client.say(process.env.TWITCH_BOT_USERNAME, `${user}, you already checked in!`)
-                    //    }
-                    //}
-
-                    //const result = await recordAttendance(user);
-                    //console.log(result)
+                    if (!data.dates.includes(today)){
+                        updateAttendance(user)
+                        console.log("Update Done")
+                        client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in updated!`)
+                    } else{
+                        client.say(process.env.TWITCH_BOT_USERNAME, `${user}, you already checked in!`)
+                    }
 
                 } 
                 
@@ -530,7 +507,7 @@ client.on('message', (channel, tags, message) => {
 
 //Function for Supabase Attendance Data Storage
 async function recordAttendance(username) {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayDateString();
 
     await supabase.from('attendance').insert({
         username,
@@ -542,8 +519,22 @@ async function recordAttendance(username) {
 
 
 //Function for getting Attendance
-function getUserAttendance(username) {
+async function updateAttendance(username) {
+    const today = getTodayDateString();
+    const { data } = await supabase
+        .from('attendance')
+        .select('*')
+        .eq('username', username)
+        .single();
+    const newDates = [...data.dates, today];
+    const newStreak = data.last === today ? data.streak : data.streak + 1;
 
+    await supabase.from('attendance').update({
+            dates: newDates,
+            last: today,
+            streak: newStreak
+            })
+        .eq('username', username);
 }
 
 // Helper Function to determine if user is moderator or broadcaster
