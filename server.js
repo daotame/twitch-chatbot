@@ -143,9 +143,25 @@ app.post('/eventsub', async (req, res) => {
                             last: today,
                             streak: 1
                         });
+                    } else {
+                        const dates = userData.dates || [];
+                        if (!dates.includes(today)) {
+                            const newDates = [...dates, today];
+                            const newStreak = userData.last === today ? userData.streak : userData.streak + 1;
+
+                            await supabase.from('attendance')
+                                .update({
+                                    dates: newDates,
+                                    last: today,
+                                    streak: newStreak
+                                })
+                            .eq('username', user);
+                        } else {
+                            client.say(process.env.TWITCH_BOT_USERNAME, `${user}, you already checked in!`)
+                        }
                     }
 
-                    const result = await recordAttendance(user);
+                    //const result = await recordAttendance(user);
                     //console.log(result)
                     client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! They have a ${data.streak} attendance streak!`)
 
@@ -532,7 +548,7 @@ async function recordAttendance(username) {
                     last: today,
                     streak: newStreak
                 })
-                .eq('username', username);
+            .eq('username', username);
     }
   }
 }
