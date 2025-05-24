@@ -132,7 +132,7 @@ app.post('/eventsub', (req, res) => {
                     const { data: userData } = supabase
                         .from('attendance')
                         .select('*')
-                        .eq('username', username)
+                        .eq('username', user)
                         .single();
 
                     if (!userData) {
@@ -157,7 +157,7 @@ app.post('/eventsub', (req, res) => {
                                 last: today,
                                 streak: newStreak
                             })
-                            .eq('username', username);
+                            .eq('username', user);
 
                         return { new: false, dates: newDates, last: today, streak: newStreak};
                     }
