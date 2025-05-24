@@ -127,7 +127,7 @@ app.post('/eventsub', async (req, res) => {
 
                     //saveAttendance();
 
-                    await recordAttendance(username);
+                    const result = await recordAttendance(username);
                     client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! You have a ${result.streak} attendance streak!`)
 
                 } 
