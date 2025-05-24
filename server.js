@@ -137,7 +137,7 @@ app.post('/eventsub', (req, res) => {
 
                     if (!userData) {
                         supabase.from('attendance').insert({
-                            username,
+                            user,
                             dates: [today],
                             last: today,
                             streak: 1
