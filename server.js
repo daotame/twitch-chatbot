@@ -508,11 +508,12 @@ async function recordAttendance(username) {
             //return { new: true, dates: [today], last: today, streak: 1};
         }
     console.log(userData)
-    console.log(userData.dates)
     console.log(userData.last)
     console.log(userData.streak)
 
     const dates = userData.dates || [];
+
+    console.log(dates)
 
     if (!dates.includes(today)) {
         const newDates = [...dates, today];
