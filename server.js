@@ -141,16 +141,16 @@ app.post('/eventsub', async (req, res) => {
                         recordAttendance(user);
                         console.log("Register  Done")
                         client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in registered!`)
-                    }
+                    } else {
+                        if (!data.dates.includes(today)){
+                            updateAttendance(user)
+                            console.log("Update Done")
+                            client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in updated!`)
+                        }else{
+                            client.say(process.env.TWITCH_BOT_USERNAME, `${user}, you already checked in!`)
+                        }
 
-                    if (!data.dates.includes(today)){
-                        updateAttendance(user)
-                        console.log("Update Done")
-                        client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in updated!`)
-                    } else{
-                        client.say(process.env.TWITCH_BOT_USERNAME, `${user}, you already checked in!`)
                     }
-
                 } 
                 
             }
