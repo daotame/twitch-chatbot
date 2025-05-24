@@ -102,7 +102,7 @@ app.post('/eventsub', (req, res) => {
 
             // Attendance Event
             if (eventType === 'channel.channel_points_custom_reward_redemption.add'){
-                const user = notification.event.user_name;
+                const user = notification.event.user_name.toLowerCase();
                 const rewardTitle = notification.event.reward.title;
 
                 if (rewardTitle === "Cult Attendance") {
@@ -271,7 +271,7 @@ const commands = {
     attendance: {
         response: (tags) => {
 
-            const username = tags.username
+            const username = tags.username.toLowerCase()
 
             //if (!attendance[username]) {
             //    attendance[username] = { dates: [] };
@@ -290,7 +290,7 @@ const commands = {
             if (error || !data) {
                 return `No attendance record found for ${username}.`;
             }
-            
+
             const streak = data.streak || 0;
             const lastSeen = data.last || 'Never';
             const days = data.dates?.length || 0;
