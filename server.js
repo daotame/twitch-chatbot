@@ -272,14 +272,8 @@ const commands = {
     attendance: {
         response: (tags, channel, client) => {
             const username = tags.username;
-            getAttendance(username);
-            const { data } = supabase
-                .from('attendance')
-                .select('*')
-                .eq('username', username)
-                .single();
-            console.log(data)
-            
+            const userAttendance = getAttendance(username);
+            console.log(userAttendance)
         }
     },
     monthly: {
