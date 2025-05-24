@@ -128,6 +128,7 @@ app.post('/eventsub', async (req, res) => {
                     //attendance[user].dates.push(today);
 
                     //saveAttendance();
+
                     const { data, error } = await supabase
                         .from('attendance')
                         .select('*')
@@ -137,11 +138,12 @@ app.post('/eventsub', async (req, res) => {
                     console.log(data);
 
                     if (!data) {
-                        await supabase.from('attendance').insert({
-                            user,
-                            dates: [today],
-                            last: today,
-                            streak: 1
+                        await supabase.from('attendance')
+                            .insert({
+                                user,
+                                dates: [today],
+                                last: today,
+                                streak: 1
                         });
                     } else {
                         const dates = data.dates || [];
