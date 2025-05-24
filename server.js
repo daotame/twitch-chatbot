@@ -102,7 +102,7 @@ app.post('/eventsub', (req, res) => {
 
             // Attendance Event
             if (eventType === 'channel.channel_points_custom_reward_redemption.add'){
-                const user = notification.event.user_name.toLowerCase();
+                const user = notification.event.user_name;
                 const rewardTitle = notification.event.reward.title;
 
                 if (rewardTitle === "Cult Attendance") {
@@ -271,7 +271,7 @@ const commands = {
     attendance: {
         response: (tags) => {
 
-            const username = tags.username.toLowerCase()
+            const username = tags.username;
 
             //if (!attendance[username]) {
             //    attendance[username] = { dates: [] };
