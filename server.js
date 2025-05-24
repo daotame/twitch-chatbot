@@ -271,7 +271,7 @@ const commands = {
     attendance: {
         response: (tags) => {
 
-            const username = tags.username.toLowerCase();
+            const username = tags.username
 
             //if (!attendance[username]) {
             //    attendance[username] = { dates: [] };
@@ -285,9 +285,9 @@ const commands = {
                 .eq('username', username)
                 .single();
             
-            //if (error || !data) {
-            //    return `No attendance record found for ${username}.`;
-            //}
+            if (error || !data) {
+                return `No attendance record found for ${username}.`;
+            }
             console.log(data);
             const streak = data.streak || 0;
             const lastSeen = data.last || 'Never';
