@@ -109,26 +109,6 @@ app.post('/eventsub', async (req, res) => {
                 if (rewardTitle === "Cult Attendance") {
                     const today = getTodayDateString();
 
-                    //if (!attendance[user]) {
-                    //    attendance[user] = { dates: [], last: null, streak: 0}
-                   // }
-
-                    //if (attendance[user].dates.includes(today)) {
-                    //    return `${user}, you've already checked in today!`;
-                    //}
-
-                    //const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-                    //if (attendance[user].last === yesterday) {
-                    //    attendance[user].streak += 1;
-                    //} else {
-                    //    attendance[user].streak = 1;
-                    //}
-
-                    //attendance[user].last = today;
-                    //attendance[user].dates.push(today);
-
-                    //saveAttendance();
-
                     const { data } = await supabase
                         .from('attendance')
                         .select('*')
@@ -291,28 +271,8 @@ const quizState = {
 const commands = {
     attendance: {
         response: (tags) => {
-
             const username = tags.username;
-
-            //if (!attendance[username]) {
-            //    attendance[username] = { dates: [] };
-            //}
-
-            //const count = attendance[username]?.dates?.length || 0;
-
-            const { data, error } = supabase
-                .from('attendance')
-                .select('*')
-                .eq('username', username)
-                .single();
-            
-            console.log(data);
-            console.log(error)
-            if (error || !data) {
-                return `No attendance record found for ${username}.`;
-            }
-
-            return `${username} has attended ${data.dates.length()} time(s), last seen on ${data.lastSeen}, streak: ${data.streak} day(s).`;
+            getAttendance(username);
         }
     },
     monthly: {
@@ -518,7 +478,7 @@ async function recordAttendance(username) {
 }
 
 
-//Function for getting Attendance
+//Function for updating Attendance
 async function updateAttendance(username) {
     const today = getTodayDateString();
     const { data } = await supabase
@@ -535,6 +495,18 @@ async function updateAttendance(username) {
             streak: newStreak
             })
         .eq('username', username);
+}
+
+// Function to get the attendance record
+async function getAttendance(username) {
+
+    const { data } = await supabase
+        .from('attendance')
+        .select('*')
+        .eq('username', username)
+        .single();
+
+    console.log(data)
 }
 
 // Helper Function to determine if user is moderator or broadcaster
