@@ -126,6 +126,13 @@ app.post('/eventsub', async (req, res) => {
                     //attendance[user].dates.push(today);
 
                     //saveAttendance();
+                    const { data, error } = await supabase
+                        .from('attendance')
+                        .select('*')
+                        .eq('username', user)
+                        .single();
+
+                    console.log(data);
 
                     const result = await recordAttendance(user);
                     console.log(result)
