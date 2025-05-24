@@ -128,7 +128,9 @@ app.post('/eventsub', (req, res) => {
 
                     const result = recordAttendance(user);
                     console.log(`[DEBUG] Attendance data:`, result);
-                    client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! Your current streak is ${result.streak} day(s).`)
+                    const testResult = getAttendance(user)
+                    console.log(testResult)
+                    //client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! Your current streak is ${result.streak} day(s).`)
    
 
 
@@ -511,6 +513,25 @@ async function recordAttendance(username) {
         } else{
             return { new: false, dates: userData.dates, last: userData.last, streak: userData.streak};
         }
+}
+
+//Async Function to get attendance
+async function getAttendance(username) {
+    const { data, error } = await supabase
+        .from('attendance')
+        .select('*')
+        .eq('username', username)
+        .single();
+
+    if (error || !data) {
+        return `No attendance record found for ${username}.`;
+    }
+
+    const streak = data.streak || 0;
+    const lastSeen = data.last || 'Never';
+    const days = data.dates?.length || 0;
+
+    return `${username} has attended ${days} time(s), last seen on ${lastSeen}, streak: ${streak} day(s).`;
 }
 
 // Helper Function to determine if user is moderator or broadcaster
