@@ -510,6 +510,7 @@ async function getAttendance(username) {
     console.log(data.dates)
     console.log(data.streak)
     const attendanceCount = data.dates?.length || 0;
+    console.log(attendanceCount)
     return `${username} has attended ${attendanceCount} times!`
 }
 
