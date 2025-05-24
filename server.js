@@ -135,8 +135,11 @@ app.post('/eventsub', async (req, res) => {
                         .eq('username', user)
                         .single();
 
+                    console.log(data)
+
                     if (!data) {
                         recordAttendance(user);
+                        console.log("Register  Done")
                         client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in registered!`)
                     }
 
