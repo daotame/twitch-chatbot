@@ -285,9 +285,9 @@ const commands = {
                 .eq('username', username)
                 .single();
             
-            if (error || !data) {
-                return `No attendance record found for ${username}.`;
-            }
+            //if (error || !data) {
+            //    return `No attendance record found for ${username}.`;
+            //}
 
             const streak = data.streak || 0;
             const lastSeen = data.last || 'Never';
@@ -524,25 +524,6 @@ function recordAttendance(username) {
         } else{
             return { new: false, dates: userData.dates, last: userData.last, streak: userData.streak};
         }
-}
-
-// Async Function to get Attendance
-function getAttendance(username) {
-  const { data, error } = supabase
-    .from('attendance')
-    .select('*')
-    .eq('username', username)
-    .single();
-
-  if (error || !data) {
-    return `No attendance record found for ${username}.`;
-  }
-
-  const streak = data.streak || 0;
-  const lastSeen = data.last || 'Never';
-  const days = data.dates?.length || 0;
-
-  return `${username} has attended ${days} time(s), last seen on ${lastSeen}, streak: ${streak} day(s).`;
 }
 
 // Helper Function to determine if user is moderator or broadcaster
