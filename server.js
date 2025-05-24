@@ -489,17 +489,17 @@ client.on('message', (channel, tags, message) => {
 
 
 //Function for Supabase Attendance Data Storage
-function recordAttendance(username) {
+async function recordAttendance(username) {
     const today = getTodayDateString()
 
-    const { data: userData } = supabase
+    const { data: userData } = await supabase
         .from('attendance')
         .select('*')
         .eq('username', username)
         .single();
 
     if (!userData) {
-        supabase.from('attendance').insert({
+        await supabase.from('attendance').insert({
             username,
             dates: [today],
             last: today,
@@ -519,7 +519,7 @@ function recordAttendance(username) {
         const newDates = [...dates, today];
         const newStreak = userData.last === today ? userData.streak: userData.streak + 1;
 
-        supabase.from('attendance')
+        await supabase.from('attendance')
             .update({
                 dates: newDates,
                 last: today,
