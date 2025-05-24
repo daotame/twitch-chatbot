@@ -270,9 +270,16 @@ const quizState = {
 //Commands List
 const commands = {
     attendance: {
-        response: (tags) => {
+        response: (tags, channel, client) => {
             const username = tags.username;
             getAttendance(username);
+            const { data } = supabase
+                .from('attendance')
+                .select('*')
+                .eq('username', username)
+                .single();
+            console.log(data)
+            
         }
     },
     monthly: {
@@ -508,7 +515,7 @@ async function getAttendance(username) {
 
     console.log(data)
     console.log(data.dates)
-    console.log(data.streak)
+    //console.log(data.streak)
     const attendanceCount = data.dates?.length || 0;
     console.log(attendanceCount)
     return `${username} has attended ${attendanceCount} times!`
