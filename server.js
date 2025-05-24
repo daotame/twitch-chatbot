@@ -107,6 +107,8 @@ app.post('/eventsub', async (req, res) => {
                 const rewardTitle = notification.event.reward.title;
 
                 if (rewardTitle === "Cult Attendance") {
+                    const today = new Date().toISOString().split('T')[0];
+
                     //if (!attendance[user]) {
                     //    attendance[user] = { dates: [], last: null, streak: 0}
                    // }
@@ -134,9 +136,18 @@ app.post('/eventsub', async (req, res) => {
 
                     console.log(data);
 
+                    if (!data) {
+                        await supabase.from('attendance').insert({
+                            user,
+                            dates: [today],
+                            last: today,
+                            streak: 1
+                        });
+                    }
+
                     const result = await recordAttendance(user);
-                    console.log(result)
-                    client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded!`)
+                    //console.log(result)
+                    client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! They have a ${data.streak} attendance streak!`)
 
                 } 
                 
@@ -299,11 +310,7 @@ const commands = {
                 return `No attendance record found for ${username}.`;
             }
 
-            const streak = data.streak || 0;
-            const lastSeen = data.last || 'Never';
-            const days = data.dates?.length || 0;
-
-            return `${username} has attended ${days} time(s), last seen on ${lastSeen}, streak: ${streak} day(s).`;
+            return `${username} has attended ${data.dates.length()} time(s), last seen on ${data.lastSeen}, streak: ${data.streak} day(s).`;
         }
     },
     monthly: {
