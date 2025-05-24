@@ -127,8 +127,8 @@ app.post('/eventsub', (req, res) => {
                     //saveAttendance();
 
                     const result = recordAttendance(user);
-                    console.log(`[DEBUG] Attendance data:`, result.streak);
-                    client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! Your current streak is ${result.streak} day(s).`)
+                    console.log(`[DEBUG] Attendance data:`, result);
+                    client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded!`)
 
                 } 
                 
@@ -273,12 +273,27 @@ const commands = {
 
             const username = tags.username.toLowerCase();
 
-            if (!attendance[username]) {
-                attendance[username] = { dates: [] };
+            //if (!attendance[username]) {
+            //    attendance[username] = { dates: [] };
+            //}
+
+            //const count = attendance[username]?.dates?.length || 0;
+
+            const { data, error } = supabase
+                .from('attendance')
+                .select('*')
+                .eq('username', username)
+                .single();
+            
+            if (error || !data) {
+                return `No attendance record found for ${username}.`;
             }
 
-            const count = attendance[username]?.dates?.length || 0;
-            return `${username}, you've checked in ${count} time(s).`;
+            const streak = data.streak || 0;
+            const lastSeen = data.last || 'Never';
+            const days = data.dates?.length || 0;
+
+            return `${username} has attended ${days} time(s), last seen on ${lastSeen}, streak: ${streak} day(s).`;
         }
     },
     monthly: {
@@ -511,6 +526,24 @@ async function recordAttendance(username) {
         }
 }
 
+// Async Function to get Attendance
+async function getAttendance(username) {
+  const { data, error } = await supabase
+    .from('attendance')
+    .select('*')
+    .eq('username', username)
+    .single();
+
+  if (error || !data) {
+    return `No attendance record found for ${username}.`;
+  }
+
+  const streak = data.streak || 0;
+  const lastSeen = data.last || 'Never';
+  const days = data.dates?.length || 0;
+
+  return `${username} has attended ${days} time(s), last seen on ${lastSeen}, streak: ${streak} day(s).`;
+}
 
 // Helper Function to determine if user is moderator or broadcaster
 function isModOrBroadcaster(tags){
