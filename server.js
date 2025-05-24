@@ -528,6 +528,14 @@ client.on('message', (channel, tags, message) => {
 
 //Function for Supabase Attendance Data Storage
 async function recordAttendance(username) {
+    const today = new Date().toISOString().split('T')[0];
+
+    const { data: userData } = await supabase
+        .from('attendance')
+        .select('*')
+        .eq('username', username)
+        .single();
+        
     if (!userData) {
         await supabase.from('attendance').insert({
             username,
