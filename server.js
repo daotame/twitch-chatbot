@@ -507,6 +507,7 @@ async function getAttendance(username) {
         .single();
 
     console.log(data)
+    return `${username} has attended ${data.dates.length()} times!`
 }
 
 // Helper Function to determine if user is moderator or broadcaster
