@@ -136,19 +136,9 @@ app.post('/eventsub', async (req, res) => {
                         .single();
 
                     if (!data) {
-                        await supabase.from('attendance')
-                            .insert({
-                                user,
-                                dates: [today],
-                                last: today,
-                                streak: 1
-                        })
-                            .select()
-                            .single();
-                            console.log(data)
+                        recordAttendance(user);
+                        client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in registered!`)
                     }
-
-                    recordAttendance(user);
 
                     //if (!data) {
                     //    await supabase.from('attendance')
@@ -538,36 +528,12 @@ client.on('message', (channel, tags, message) => {
 
 //Function for Supabase Attendance Data Storage
 async function recordAttendance(username) {
-    const today = new Date().toISOString().split('T')[0];
-
-    const { data: userData } = await supabase
-        .from('attendance')
-        .select('*')
-        .eq('username', username)
-        .single();
-
-    if (!userData) {
-        await supabase.from('attendance').insert({
-            username,
-            dates: [today],
-            last: today,
-            streak: 1
-        });
-    } else {
-        const dates = userData.dates || [];
-        if (!dates.includes(today)) {
-            const newDates = [...dates, today];
-            const newStreak = userData.last === today ? userData.streak : userData.streak + 1;
-
-            await supabase.from('attendance')
-                .update({
-                    dates: newDates,
-                    last: today,
-                    streak: newStreak
-                })
-            .eq('username', username);
-    }
-  }
+    await supabase.from('attendance').insert({
+        username,
+        dates: [today],
+        last: today,
+        streak: 1
+    });
 }
 
 
