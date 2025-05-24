@@ -126,44 +126,9 @@ app.post('/eventsub', (req, res) => {
 
                     //saveAttendance();
 
-                    //const result = recordAttendance(user);
-                    const today = getTodayDateString()
-
-                    const { data: userData } = supabase
-                        .from('attendance')
-                        .select('*')
-                        .eq('username', user)
-                        .single();
-
-                    if (!userData) {
-                        supabase.from('attendance').insert({
-                            user,
-                            dates: [today],
-                            last: today,
-                            streak: 1
-                        });
-                    return { new: true, dates: [today], last: today, streak: 1};
-                    } 
-
-                    const dates = userData.dates || [];
-
-                    if (!dates.includes(today)) {
-                        const newDates = [...dates, today];
-                        const newStreak = userData.last === today ? userData.streak: userData.streak + 1;
-
-                        supabase.from('attendance')
-                            .update({
-                                dates: newDates,
-                                last: today,
-                                streak: newStreak
-                            })
-                            .eq('username', user);
-
-                        return { new: false, dates: newDates, last: today, streak: newStreak};
-                    }
-
-                    //console.log(`[DEBUG] Attendance data:`, result);
-                    client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! Your current streak is ${userData.streak} day(s).`)
+                    const result = recordAttendance(user);
+                    console.log(`[DEBUG] Attendance data:`, result.streak);
+                    client.say(process.env.TWITCH_BOT_USERNAME, `${user}, check-in recorded! Your current streak is ${result.streak} day(s).`)
 
                 } 
                 
